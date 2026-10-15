@@ -259,9 +259,9 @@ static void modem_put_bit(void *user_data, int bit) {
 							if ((unsigned char)byte == 0xFF)
 								send(rx->sock, &byte, 1, 0);	/* escape 0xFF as IAC IAC for telnet */
 						}
-						// TODO - why does this increment by 10?
-						rx->readpos=(rx->readpos+10)%MODEM_BITBUFFER_SIZE;
-						rx->fill-=10;
+						// skip past the whole character: start + data + parity + stop bits
+						rx->readpos=(rx->readpos+1+databits+paritybits+stopbits)%MODEM_BITBUFFER_SIZE;
+						rx->fill-=(1+databits+paritybits+stopbits);
 					} else {	// no valid framing (no stopbit), remove first bit and maybe try again
 						rx->fill--;
 						rx->readpos++;
